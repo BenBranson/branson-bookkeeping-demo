@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-i3FAnWPFvwb5k0gUDG+7UjqeZPyl9gw6/FOyS6ZVB04='; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; frame-src 'none'; object-src 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Business Explorer</title>
 <style>
@@ -162,7 +163,7 @@ footer{font-size:12.5px;color:var(--muted);margin-top:8px}
     <div class="btns" style="margin:0">
       <button class="btn" id="clearPlan">Clear</button>
       <button class="btn primary" id="savePlan">Save this plan</button>
-      <button class="btn" onclick="window.print()">Print</button>
+      <button class="btn" id="printBtn">Print</button>
       <a class="btn navy" id="ctaPlan" href="#">Discuss with Ben →</a>
     </div>
   </div>
@@ -351,7 +352,7 @@ footer{font-size:12.5px;color:var(--muted);margin-top:8px}
 </div>
 
 <script>
-const D={"meta":{"firm":"Benjamin Branson Bookkeeping","client":"Sample Landscaping Co.","period":"July 2026","periodKey":"2026-07","monthName":"July","balanceDate":"Balances as of July 31, 2026","generatedAt":"October 5, 2026 at 5:10 PM","environment":"sample","isSample":true,"isPartialMonth":false,"snapshotID":"3df62331a8c470b007f191ad2c407563c932bc074cda3ea91f0d7a80d34978ea","snapshotRef":"sample"},"reviewStatus":"pending","months":[["Jul '25",68876,48068,20850],["Aug '25",64764,46300,18506],["Sep '25",55512,42323,13231],["Oct '25",47288,38787,8543],["Nov '25",38036,34810,3268],["Dec '25",32896,32600,338],["Jan '26",34736,32959,1819],["Feb '26",36977,33894,3125],["Mar '26",47062,39854,7250],["Apr '26",58827,44766,14103],["May '26",68352,46991,21403],["Jun '26",72834,48862,24014],["Jul '26",75075,53098,22019]],"sales":75075,"profit":22019,"otherIncome":42,"total":53098,"cash":62128.45,"costs":[["Cost of goods sold",20954,1,true],["Payroll Expenses",15166,0.75,false],["Professional Fees",3750,0,false],["Rent or Lease",3200,0,false],["Vehicle Fuel",2881,0.75,false],["Equipment Rental",2546,0.75,false],["Other (5 categories)",1349,0.25,false],["Repairs & Maintenance",1152,0.25,false],["Insurance",1140,0,false],["Advertising & Marketing",650,0,false],["Other expenses (interest, fees)",310,0,false]],"lines":[["Landscaping Services",61053],["Materials Sales",14022],["Other income",42]],"ar":[["Current",17625.4,1,4],["1–30 days",5350,2,5],["31–60 days",1480,4,8],["61–90 days",1150,5,9]],"arOld":["91+ days",2310,6,9],"cashExtras":[{"id":"undeposited","label":"Undeposited Funds (payments received, not yet banked)","amount":1850,"from":1,"to":1,"note":"deposited in week 1"}],"ap":[["Overdue (31+ days)",550,1,1],["1–30 days",2252,1,2],["Current",7040.18,2,3]],"savedPlans":[]};
+const D={"meta":{"firm":"Benjamin Branson Bookkeeping","client":"Sample Landscaping Co.","period":"July 2026","periodKey":"2026-07","monthName":"July","balanceDate":"Balances as of July 31, 2026","generatedAt":"October 25, 2026 at 1:01 AM","environment":"sample","isSample":true,"isPartialMonth":false,"snapshotID":"d65b29bb5ab2238a7548244752f905f8c95a54672b79d175e498cd8f5c0a29cc","snapshotRef":"sample"},"reviewStatus":"pending","months":[["Jul '25",68876,48068,20850],["Aug '25",64764,46300,18506],["Sep '25",55512,42323,13231],["Oct '25",47288,38787,8543],["Nov '25",38036,34810,3268],["Dec '25",32896,32600,338],["Jan '26",34736,32959,1819],["Feb '26",36977,33894,3125],["Mar '26",47062,39854,7250],["Apr '26",58827,44766,14103],["May '26",68352,46991,21403],["Jun '26",72834,48862,24014],["Jul '26",75075,53098,22019]],"sales":75075,"profit":22019,"otherIncome":42,"total":53098,"cash":62128.45,"costs":[["Cost of goods sold",20954,1,true],["Payroll Expenses",15166,0.75,false],["Professional Fees",3750,0,false],["Rent or Lease",3200,0,false],["Vehicle Fuel",2881,0.75,false],["Equipment Rental",2546,0.75,false],["Other (5 categories)",1349,0.25,false],["Repairs & Maintenance",1152,0.25,false],["Insurance",1140,0,false],["Advertising & Marketing",650,0,false],["Other expenses (interest, fees)",310,0,false]],"lines":[["Landscaping Services",61053],["Materials Sales",14022],["Other income",42]],"ar":[["Current",17625.4,1,4],["1–30 days",5350,2,5],["31–60 days",1480,4,8],["61–90 days",1150,5,9]],"arOld":["91+ days",2310,6,9],"cashExtras":[{"id":"undeposited","label":"Undeposited Funds (payments received, not yet banked)","amount":1850,"from":1,"to":1,"note":"deposited in week 1"}],"ap":[["Overdue (31+ days)",550,1,1],["1–30 days",2252,1,2],["Current",7040.18,2,3]],"savedPlans":[]};
 // Bump whenever any formula changes, so a saved plan says which rules produced it.
 // 1.0 mockup · 1.1 generated from snapshots · 1.2 loss/zero-sales guards, other income kept out of costs
 // 2.0 Version 2 tab: stress test, price × jobs heatmap, which-guess-matters-most
@@ -374,6 +375,12 @@ const REVIEW_STATUS=D.reviewStatus, SNAPSHOT_REF=D.meta.snapshotRef, SNAPSHOT_ID
 const MIX_CONFIRMED={by:null,at:null};
 const MAIL="mailto:benjamin@benjaminbransonbookkeeping.com?subject=";
 const $=id=>document.getElementById(id);
+// Names (accounts, customers, the company) come from QuickBooks and plan files come from outside: anything that
+// is put into the page as HTML goes through H first. safeDeep does the same for every string in a loaded plan.
+// (Security review 2026-10.) The page is also generated with a Content-Security-Policy that blocks inline
+// handlers and every network request, so a miss here cannot send anything anywhere.
+const H=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const safeDeep=v=>typeof v==="string"?H(v):Array.isArray(v)?v.map(safeDeep):v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,safeDeep(x)])):v;
 const fmt=(v,dec=2)=>(v<0?"-":"")+"$"+Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:dec,maximumFractionDigits:dec});
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const variable=()=>COSTS.reduce((s,c)=>s+c[1]*c[2],0);
@@ -436,8 +443,8 @@ function bars(el,pairs,{h=220,colors=["--teal","--gold"],onClick,sel,neg=false,l
   pairs.forEach((p,i)=>{const x0=pad+i*gw+(gw-bw*keys)/2;
     if(sel===i)s+=`<rect x="${pad+i*gw+2}" y="2" width="${gw-4}" height="${h-bottom}" rx="6" fill="${css("--soft")}"/>`;
     p.vals.forEach((v,k)=>{const top=Math.min(y(v),y(0)),ht=Math.max(2,Math.abs(y(v)-y(0)));
-      s+=`<rect class="bar" data-i="${i}" x="${x0+k*bw}" y="${top}" width="${bw-2}" height="${ht}" rx="3" fill="${v<0?css("--red"):css(p.colors?.[k]||colors[k])}"><title>${p.label}: ${fmt(v)}</title></rect>`});
-    s+=`<text x="${pad+i*gw+gw/2}" y="${h-8}" text-anchor="middle" font-size="10" fill="${css("--muted")}">${p.label}</text>`});
+      s+=`<rect class="bar" data-i="${i}" x="${x0+k*bw}" y="${top}" width="${bw-2}" height="${ht}" rx="3" fill="${v<0?css("--red"):css(p.colors?.[k]||colors[k])}"><title>${H(p.label)}: ${fmt(v)}</title></rect>`});
+    s+=`<text x="${pad+i*gw+gw/2}" y="${h-8}" text-anchor="middle" font-size="10" fill="${css("--muted")}">${H(p.label)}</text>`});
   if(line!=null)s+=`<line x1="${pad}" x2="${w}" y1="${y(line)}" y2="${y(line)}" stroke="${css("--red")}" stroke-dasharray="5 4" stroke-width="2"/>`;
   el.innerHTML=s+"</svg>";
   if(onClick)el.querySelectorAll(".bar").forEach(b=>b.onclick=()=>onClick(+b.dataset.i));
@@ -469,14 +476,14 @@ let selCost=-1;
 function drawCosts(){
   if(!COSTS.length){$("costs").innerHTML=`<div class="empty">Cost details aren't available for this report.</div>`;return}
   const max=Math.max(COSTS[0][1],1);
-  $("costs").innerHTML=COSTS.map((c,i)=>`<div class="r${i===selCost?" sel":""}" data-i="${i}" tabindex="0"><div>${c[0]}<div class="t"><div class="f" style="width:${c[1]/max*100}%"></div></div></div><div class="num">-${fmt(c[1])}</div></div>`).join("");
+  $("costs").innerHTML=COSTS.map((c,i)=>`<div class="r${i===selCost?" sel":""}" data-i="${i}" tabindex="0"><div>${H(c[0])}<div class="t"><div class="f" style="width:${c[1]/max*100}%"></div></div></div><div class="num">-${fmt(c[1])}</div></div>`).join("");
   $("costs").querySelectorAll(".r").forEach(r=>r.onclick=()=>{selCost=+r.dataset.i;drawCosts()});
   if(selCost<0)return;
   const [n,v,share]=COSTS[selCost],cents=SALES>0?Math.round(v/SALES*100):0,cut=v*.1;
-  $("costDetail").innerHTML=`<b>${n}</b><br>${fmt(v)} in ${MN}, about <b>${cents}¢ of every $1</b> of sales. Set to ${Math.round(share*100)}% "grows with jobs".<br><br>Cutting it 10% would add <b>${fmt(cut)}</b> a month (${fmt(cut*12,0)} a year), if sales stay the same.`;
+  $("costDetail").innerHTML=`<b>${H(n)}</b><br>${fmt(v)} in ${MN}, about <b>${cents}¢ of every $1</b> of sales. Set to ${Math.round(share*100)}% "grows with jobs".<br><br>Cutting it 10% would add <b>${fmt(cut)}</b> a month (${fmt(cut*12,0)} a year), if sales stay the same.`;
 }
 function drawMix(){
-  $("mix").innerHTML=COSTS.map((c,i)=>`<span>${c[0]}</span><select data-i="${i}">${[0,.25,.5,.75,1].map(v=>`<option value="${v}"${v===c[2]?" selected":""}>${v*100}% with jobs</option>`).join("")}</select>`).join("");
+  $("mix").innerHTML=COSTS.map((c,i)=>`<span>${H(c[0])}</span><select data-i="${i}">${[0,.25,.5,.75,1].map(v=>`<option value="${v}"${v===c[2]?" selected":""}>${v*100}% with jobs</option>`).join("")}</select>`).join("");
   $("mix").querySelectorAll("select").forEach(s=>s.onchange=()=>{COSTS[+s.dataset.i][2]=+s.value;all()});
   $("mixStatus").innerHTML=MIX_CONFIRMED.by?`Confirmed by ${MIX_CONFIRMED.by} on ${MIX_CONFIRMED.at}.`:`<span class="tag pending">Not yet confirmed</span> These percentages are placeholders until Ben checks how your fuel, labor and other costs actually behave.`;
 }
@@ -520,7 +527,7 @@ const Q={
     return{state:after<0?"below":"close",label:"Price raise needed",big:`Raise prices about ${raise.toFixed(1)}%`,
       text:`A ${v.pct}% increase on materials (${fmt(materials())} in ${MN}) costs about <b>${fmt(hit)}</b> a month${planHas("supplier")?" on top of your plan":""}. Raising prices ${raise.toFixed(1)}% covers it.`,
       chart:[{label:baseName("supplier"),vals:[before]},{label:"After increase",vals:[after],colors:["--gold"]}],
-      limits:[{t:`Materials here = ${COSTS.filter(c=>c[3]).map(c=>c[0]).join(", ")||"none found"}.`},{t:"Assumes the same number of jobs after the price change."}],
+      limits:[{t:`Materials here = ${COSTS.filter(c=>c[3]).map(c=>H(c[0])).join(", ")||"none found"}.`},{t:"Assumes the same number of jobs after the price change."}],
       apply:()=>{plan.supplierPct=v.pct}}}},
   price:{inputs:[["up","Raise prices by",10,0,30,1,"%"],["lose","Lose this share of jobs",5,0,40,1,"%"]],add:"Add to my plan",solve:v=>{
     const before=monthly({...plan,priceUp:0,loseJobs:0}).profit,m=monthly({...plan,priceUp:v.up,loseJobs:v.lose}),d=m.profit-before;
@@ -553,7 +560,7 @@ $("addQ").onclick=()=>{Q[$("q").value].solve(vals).apply();drawPlan();drawCash()
 // ---------- 3. Lines ----------
 const lineOn=LINES.map(()=>true);
 function drawLines(){
-  $("lines").innerHTML=LINES.map((l,i)=>`<button class="sw${lineOn[i]?"":" off"}" data-i="${i}" aria-pressed="${lineOn[i]}"><span class="nm">${l[0]}</span><span style="display:flex;gap:10px;align-items:center"><b>${fmt(l[1])}</b><span class="pill"></span></span></button>`).join("");
+  $("lines").innerHTML=LINES.map((l,i)=>`<button class="sw${lineOn[i]?"":" off"}" data-i="${i}" aria-pressed="${lineOn[i]}"><span class="nm">${H(l[0])}</span><span style="display:flex;gap:10px;align-items:center"><b>${fmt(l[1])}</b><span class="pill"></span></span></button>`).join("");
   $("lines").querySelectorAll(".sw").forEach(t=>t.onclick=()=>{lineOn[+t.dataset.i]=!lineOn[+t.dataset.i];drawLines()});
   if(SALES<=0){$("linesCard").hidden=true;return}
   $("avgVar").textContent=Math.round(variable()/SALES*100)+"¢";
@@ -748,11 +755,11 @@ function drawV2(){if($("tab2").hidden)return;drawStress();drawHeat();drawTornado
 // ================= Version 3: What worked? =================
 // Compares a saved plan (made from an earlier month's report) with THIS month's numbers.
 const monthsBetween=(a,b)=>{const[ya,ma]=a.split("-").map(Number),[yb,mb]=b.split("-").map(Number);return(yb-ya)*12+(mb-ma)};
-const PLANS=(D.savedPlans||[]).slice();
+const PLANS=(D.savedPlans||[]).map(safeDeep);
 let selPlan=-1;
 function planIssue(pl){
   if(!pl||pl.kind!=="voice-ledger-explorer-plan")return"This file isn't a Voice Ledger plan.";
-  if(pl.client!==CLIENT)return`This plan is for ${pl.client}, not ${CLIENT}. It can't be compared here.`;
+  if(pl.client!==H(CLIENT))return`This plan is for ${pl.client}, not ${H(CLIENT)}. It can't be compared here.`;
   if(!pl.baseline||!pl.resultsAtSave)return"This plan file is missing its starting numbers (it may be from an early version).";
   return null;
 }
@@ -769,7 +776,7 @@ function drawPlans(){
 }
 $("planFile").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;let pl=null;
-  try{pl=JSON.parse(await f.text())}catch{}
+  try{pl=safeDeep(JSON.parse(await f.text()))}catch{}
   const issue=planIssue(pl);$("loadMsg").hidden=false;
   if(issue){$("loadMsg").innerHTML=`<b>Not loaded.</b> ${issue}`;return}
   const dup=PLANS.findIndex(p=>p.savedAt===pl.savedAt&&p.baseline.snapshotID===pl.baseline.snapshotID);
@@ -858,6 +865,7 @@ document.querySelectorAll("nav button[data-tab]").forEach(b=>b.onclick=()=>{
   addEventListener("scroll",check,{passive:true});check()})();
 
 function all(){drawTrend();drawCosts();drawMix();drawQ();drawLines();drawCash()}
+$("printBtn").onclick=()=>window.print();
 all();window.addEventListener("resize",()=>{if(!$("tab1").hidden){drawTrend();answerQ();drawLines();drawCash()}});
 </script>
 </body>
